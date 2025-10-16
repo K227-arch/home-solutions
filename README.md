@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Housing Solutions – Authentication System
 
-## Getting Started
+This repository contains a secure authentication flow for the Housing Solutions platform, powered by Supabase. It includes signup, login, role-based redirects, and a minimal, neutral UI with no framework branding.
 
-First, run the development server:
+## Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ (project is tested on Node 20)
+- A Supabase project with URL and keys
+
+## Environment Setup
+
+Create a `.env.local` file in the project root and set the following variables:
+
+```
+NEXT_PUBLIC_SUPABASE_URL=... 
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+SUPABASE_JWT_SECRET=...
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run the dev server:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+npm run dev
+```
 
-## Learn More
+Open `http://localhost:3000` to access the app.
 
-To learn more about Next.js, take a look at the following resources:
+## Key Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Signup with `react-hook-form` and Zod validation
+- Password strength indicator
+- Supabase authentication with `emailRedirectTo`
+- Role-based redirect on login (`/dashboard` or `/admin`)
+- Neutral UI with no framework branding
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project Structure
 
-## Deploy on Vercel
+- `src/app/` – App routes and pages
+- `src/lib/` – Supabase client and validations
+- `src/components/` – Reusable UI components
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Deployment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use any Node-compatible hosting provider. Ensure environment variables are set securely on the server. Avoid exposing `SUPABASE_SERVICE_ROLE_KEY` and `SUPABASE_JWT_SECRET` in client code.

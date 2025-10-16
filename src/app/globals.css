@@ -1,20 +1,21 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light dark;
   --background: #ffffff;
   --foreground: #000000;
   --text-primary: #000000;
   --text-secondary: #333333;
   --text-muted: #555555;
-  --text-error: #d00000;
-  --text-success: #006400;
+  --text-error: #b00020; /* WCAG-friendly deep red */
+  --text-success: #0b6b0b; /* High-contrast green */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,8 +34,10 @@ body {
   background: var(--background);
   color: var(--text-primary);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,20 +45,35 @@ body {
 /* High contrast text classes */
 .text-high-contrast {
   color: var(--text-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .text-readable {
-  font-size: 1rem;
-  letter-spacing: 0.01em;
-  line-height: 1.6;
+  font-size: 1rem; /* 16px */
+  letter-spacing: 0.015em;
+  line-height: 1.7;
 }
 
 .text-label {
   font-weight: 600;
   color: var(--text-primary);
+  font-size: 0.875rem; /* 14px */
   margin-bottom: 0.5rem;
   display: block;
+}
+
+/* Status colors */
+.text-error {
+  color: var(--text-error);
+}
+.text-success {
+  color: var(--text-success);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+.text-secondary {
+  color: var(--text-secondary);
 }
 
 input, textarea, select {
@@ -68,4 +86,10 @@ input, textarea, select {
 ::placeholder {
   color: var(--text-muted);
   opacity: 1;
+}
+
+/* Improve selection visibility */
+::selection {
+  background: rgba(59, 130, 246, 0.25); /* blue-500 at 25% */
+  color: var(--text-primary);
 }

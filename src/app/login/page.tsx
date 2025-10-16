@@ -67,8 +67,8 @@ export default function Login() {
   };
   
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-900 p-8 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-high-contrast">Sign in to your account</h2>
           <p className="mt-2 text-center text-sm text-readable">
@@ -80,17 +80,17 @@ export default function Login() {
         </div>
         
         {message && (
-          <div className="bg-green-50 border-l-4 border-green-400 p-4">
+          <div className="bg-green-50 dark:bg-green-900/30 border-l-4 border-green-400 dark:border-green-600 p-4">
             <div className="flex">
               <div className="ml-3">
-                <p className="text-sm text-green-700 text-readable">{message}</p>
+                <p className="text-sm text-success text-readable">{message}</p>
               </div>
             </div>
           </div>
         )}
         
         {serverError && (
-          <div className="bg-red-50 border-l-4 border-red-400 p-4">
+          <div className="bg-red-50 dark:bg-red-900/30 border-l-4 border-red-400 dark:border-red-600 p-4">
             <div className="flex">
               <div className="ml-3">
                 <p className="text-sm text-error">{serverError}</p>
@@ -110,7 +110,7 @@ export default function Login() {
                 type="email"
                 autoComplete="email"
                 {...register('email')}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-high-contrast"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-high-contrast"
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-error font-medium">{errors.email.message}</p>
@@ -126,7 +126,7 @@ export default function Login() {
                 type="password"
                 autoComplete="current-password"
                 {...register('password')}
-                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-high-contrast"
+                className="mt-1 appearance-none block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-high-contrast"
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-error font-medium">{errors.password.message}</p>
@@ -140,9 +140,9 @@ export default function Login() {
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="remember-me" className="ml-2 block text-sm text-label">
                 Remember me
               </label>
             </div>
