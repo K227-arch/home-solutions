@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { COUNTRY_DIAL_CODES } from '@/lib/countryDialCodes';
 import { supabase } from '@/lib/supabase';
 
 // US States data
@@ -209,16 +210,15 @@ export default function SignUp() {
                     value={formData.phoneCountryCode}
                     onValueChange={(value) => handleInputChange("phoneCountryCode", value)}
                   >
-                    <SelectTrigger className="w-24 bg-background/50 border-border focus:border-accent">
+                    <SelectTrigger className="w-28 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 text-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700 shadow-sm focus:ring-accent focus:border-accent">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="+1">+1</SelectItem>
-                      <SelectItem value="+44">+44</SelectItem>
-                      <SelectItem value="+33">+33</SelectItem>
-                      <SelectItem value="+49">+49</SelectItem>
-                      <SelectItem value="+81">+81</SelectItem>
-                      <SelectItem value="+86">+86</SelectItem>
+                    <SelectContent className="bg-blue-50/90 dark:bg-blue-900/90 text-blue-900 dark:text-blue-100 border-blue-200 dark:border-blue-700 backdrop-blur-md shadow-lg">
+                      {COUNTRY_DIAL_CODES.map((code) => (
+                        <SelectItem key={code} value={code} className="text-blue-900 dark:text-blue-100">
+                          {code}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <Input
@@ -264,12 +264,12 @@ export default function SignUp() {
                     value={formData.state}
                     onValueChange={(value) => handleInputChange("state", value)}
                   >
-                    <SelectTrigger className="bg-background/50 border-border focus:border-accent">
+                    <SelectTrigger className="w-full bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900 dark:to-blue-800 text-blue-800 dark:text-blue-100 border-blue-200 dark:border-blue-700 shadow-sm focus:ring-accent focus:border-accent">
                       <SelectValue placeholder="Select state" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="bg-blue-50/90 dark:bg-blue-900/90 text-blue-900 dark:text-blue-100 border-blue-200 dark:border-blue-700 backdrop-blur-md shadow-lg">
                       {usStates.map((state) => (
-                        <SelectItem key={state.value} value={state.value}>
+                        <SelectItem key={state.value} value={state.value} className="text-blue-900 dark:text-blue-100">
                           {state.label}
                         </SelectItem>
                       ))}

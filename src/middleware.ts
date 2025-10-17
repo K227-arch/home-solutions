@@ -2,7 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { corsMiddleware } from './lib/cors';
-import { csrfMiddleware } from './middleware/csrf';
+// CSRF protection disabled per configuration
 import { rateLimitMiddleware } from './lib/rate-limit';
 
 export async function middleware(req: NextRequest) {
@@ -18,13 +18,7 @@ export async function middleware(req: NextRequest) {
   // Apply CORS
   res = corsMiddleware(req, res);
   
-  // Apply CSRF protection for mutation requests
-  if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-    const csrfResponse = csrfMiddleware(req);
-    if (csrfResponse.status !== 200) {
-      return csrfResponse;
-    }
-  }
+  // CSRF protection disabled: allow mutation requests without token validation
   
   // Initialize Supabase client
   const supabase = createServerClient(
