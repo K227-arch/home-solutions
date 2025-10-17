@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -11,14 +11,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import { supabase } from '@/lib/supabase';
+
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const message = searchParams.get('message');
+
+
 
   const {
     register,
@@ -32,36 +35,44 @@ export default function Login() {
     },
   });
 
+  // Safely read JSON bodies; handle empty (204) or non-JSON responses
+  const readJsonSafe = async (res: Response) => {
+    const ct = res.headers.get('content-type') || '';
+    if (res.status === 204 || !ct.includes('application/json')) return null;
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
   const onSubmit = async (data: SignInFormValues) => {
     setIsLoading(true);
     setServerError(null);
 
     try {
-      const { data: signInData, error } = await supabase.auth.signInWithPassword({
-        email: data.email,
-        password: data.password,
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(data),
       });
 
-      if (error) {
-        throw error;
-      }
-
-      // Determine redirect target based on role for seamless transition
-      let redirectPath = '/dashboard';
-      const userId = signInData?.user?.id;
-      if (userId) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .single();
-        if (roleData?.role === 'admin') {
-          redirectPath = '/admin';
+      const payload = await readJsonSafe(res);
+      if (!res.ok) {
+        let msg = payload?.error as string | undefined;
+        if (!msg) {
+          try {
+            msg = await res.text();
+          } catch {}
         }
+        throw new Error(msg || 'Invalid login credentials');
       }
 
-      // Use replace to avoid back-navigation to login
-      router.replace(redirectPath);
+      // Successful login: server set secure cookies; redirect to dashboard
+      router.replace('/dashboard');
       router.refresh();
     } catch (error: any) {
       setServerError(error.message || 'Invalid login credentials');
@@ -111,7 +122,7 @@ export default function Login() {
             <Input
               id="email"
               type="email"
-              placeholder="you@example.com"
+              placeholder=""
               autoComplete="email"
               {...register('email')}
               className="bg-background/50 border-border focus:border-accent transition-colors"
@@ -126,7 +137,7 @@ export default function Login() {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder=""
               autoComplete="current-password"
               {...register('password')}
               className="bg-background/50 border-border focus:border-accent transition-colors"
@@ -157,13 +168,10 @@ export default function Login() {
         </form>
 
         {/* Divider */}
-        <div className="relative my-6">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border"></div>
-          </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-          </div>
+        <div className="flex items-center my-6">
+          <div className="flex-1 border-t border-border"></div>
+          <span className="mx-3 text-xs text-muted-foreground">Or continue with</span>
+          <div className="flex-1 border-t border-border"></div>
         </div>
 
         {/* Social Login */}

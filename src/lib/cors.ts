@@ -13,7 +13,7 @@ export function corsMiddleware(req: NextRequest, res: NextResponse) {
     // Set CORS headers
     res.headers.set('Access-Control-Allow-Origin', origin);
     res.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-csrf-token');
+    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.headers.set('Access-Control-Allow-Credentials', 'true');
   }
   

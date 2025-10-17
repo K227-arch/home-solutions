@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
@@ -15,8 +14,11 @@ const registerSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // Create a response to attach cookies set by Supabase
+  const res = new NextResponse();
+
   // Rate limiting check
-  const ip = request.ip || 'unknown';
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
   const now = Date.now();
   const ipData = ipRequestCounts.get(ip) || { count: 0, timestamp: now };
   
@@ -30,7 +32,7 @@ export async function POST(request: NextRequest) {
   if (ipData.count >= MAX_REQUESTS) {
     return NextResponse.json(
       { error: 'Too many requests, please try again later' },
-      { status: 429 }
+      { status: 429, headers: res.headers }
     );
   }
   
@@ -46,16 +48,26 @@ export async function POST(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json(
         { error: 'Invalid input', details: result.error.format() },
-        { status: 400 }
+        { status: 400, headers: res.headers }
       );
     }
     
-    // Initialize Supabase client
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies }
-  );
+    // Initialize Supabase client with request/response cookies
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name: string) => request.cookies.get(name)?.value,
+          set: (name: string, value: string, options: any) => {
+            res.cookies.set({ name, value, ...options });
+          },
+          remove: (name: string, options: any) => {
+            res.cookies.set({ name, value: '', ...options });
+          },
+        },
+      }
+    );
     
     // Register user
     const { data, error } = await supabase.auth.signUp({
@@ -69,22 +81,22 @@ export async function POST(request: NextRequest) {
     if (error) {
       return NextResponse.json(
         { error: error.message },
-        { status: 400 }
+        { status: 400, headers: res.headers }
       );
     }
-    
+
     return NextResponse.json(
       { 
         message: 'Registration successful. Please check your email to confirm your account.',
         user: data.user
       },
-      { status: 201 }
+      { status: 201, headers: res.headers }
     );
   } catch (error) {
     console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
-      { status: 500 }
+      { status: 500, headers: res.headers }
     );
   }
 }
