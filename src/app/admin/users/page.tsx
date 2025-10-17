@@ -17,6 +17,13 @@ export default function UserManagement() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [userHistory, setUserHistory] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState<'all' | 'admin' | 'user'>('all');
+  const [activityFilter, setActivityFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [sortKey, setSortKey] = useState<'email' | 'created' | 'lastLogin'>('created');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   useEffect(() => {
     fetchUsers();
@@ -118,6 +125,60 @@ export default function UserManagement() {
     }
   };
 
+  const handleViewHistory = async (user: User) => {
+    try {
+      setSelectedUser(user);
+      setIsHistoryModalOpen(true);
+      // Fetch audit log history for the user
+      const { data, error } = await supabase
+        .from('auth_audit_log')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      setUserHistory(data || []);
+    } catch (err) {
+      console.error('Error fetching user history:', err);
+      setUserHistory([]);
+    }
+  };
+
+  const exportCsv = () => {
+    const rows = filteredUsers.map(u => ({
+      email: u.email,
+      role: u.role,
+      created_at: u.created_at,
+      last_sign_in_at: u.last_sign_in_at || '',
+    }));
+    const headers = Object.keys(rows[0] || { email: '', role: '', created_at: '', last_sign_in_at: '' });
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${String(r[h as keyof typeof r] || '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'users.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const filteredUsers = users
+    .filter(u => (roleFilter === 'all' ? true : u.role === roleFilter))
+    .filter(u => {
+      if (activityFilter === 'all') return true;
+      const isActive = !!u.last_sign_in_at;
+      return activityFilter === 'active' ? isActive : !isActive;
+    })
+    .filter(u => u.email.toLowerCase().includes(searchTerm.toLowerCase()))
+    .sort((a, b) => {
+      const dir = sortDir === 'asc' ? 1 : -1;
+      if (sortKey === 'email') return a.email.localeCompare(b.email) * dir;
+      if (sortKey === 'created') return (new Date(a.created_at).getTime() - new Date(b.created_at).getTime()) * dir;
+      const aLogin = a.last_sign_in_at ? new Date(a.last_sign_in_at).getTime() : 0;
+      const bLogin = b.last_sign_in_at ? new Date(b.last_sign_in_at).getTime() : 0;
+      return (aLogin - bLogin) * dir;
+    });
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -130,7 +191,58 @@ export default function UserManagement() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">User Management</h1>
-        <Button onClick={fetchUsers}>Refresh</Button>
+        <div className="flex items-center space-x-3">
+          <Button onClick={fetchUsers}>Refresh</Button>
+          <button onClick={exportCsv} className="px-3 py-2 bg-gray-800 text-white rounded hover:bg-gray-900">Export CSV</button>
+        </div>
+      </div>
+      <div className="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search by email"
+            className="md:col-span-2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value as any)}
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="all">All Roles</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+          </select>
+          <select
+            value={activityFilter}
+            onChange={(e) => setActivityFilter(e.target.value as any)}
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="all">All Activity</option>
+            <option value="active">Active (has login)</option>
+            <option value="inactive">Inactive (never logged in)</option>
+          </select>
+          <div className="flex space-x-2">
+            <select
+              value={sortKey}
+              onChange={(e) => setSortKey(e.target.value as any)}
+              className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="created">Sort by Created</option>
+              <option value="lastLogin">Sort by Last Login</option>
+              <option value="email">Sort by Email</option>
+            </select>
+            <select
+              value={sortDir}
+              onChange={(e) => setSortDir(e.target.value as any)}
+              className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="asc">Asc</option>
+              <option value="desc">Desc</option>
+            </select>
+          </div>
+        </div>
       </div>
       
       <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -145,7 +257,7 @@ export default function UserManagement() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <tr key={user.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.email}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -169,6 +281,12 @@ export default function UserManagement() {
                     className="text-blue-600 hover:text-blue-900 mr-4"
                   >
                     Edit
+                  </button>
+                  <button 
+                    onClick={() => handleViewHistory(user)}
+                    className="text-gray-700 hover:text-gray-900 mr-4"
+                  >
+                    History
                   </button>
                   <button 
                     onClick={() => handleDeleteUser(user.id)}
@@ -216,6 +334,36 @@ export default function UserManagement() {
               >
                 Save Changes
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User History Modal */}
+      {isHistoryModalOpen && selectedUser && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">Membership History</h2>
+              <button onClick={() => setIsHistoryModalOpen(false)} className="text-gray-600 hover:text-gray-800">Close</button>
+            </div>
+            <p className="text-sm text-gray-600 mb-2">{selectedUser.email}</p>
+            <div className="max-h-96 overflow-auto border border-gray-200 rounded">
+              {userHistory.length === 0 ? (
+                <div className="p-4 text-gray-500">No history available.</div>
+              ) : (
+                <ul className="divide-y divide-gray-200">
+                  {userHistory.map((h) => (
+                    <li key={h.id} className="p-3 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium">{String(h.action)}</span>
+                        <span className="text-gray-500">{new Date(h.created_at).toLocaleString()}</span>
+                      </div>
+                      <div className="text-gray-600 mt-1">{h.metadata ? JSON.stringify(h.metadata) : '—'}</div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </div>
         </div>

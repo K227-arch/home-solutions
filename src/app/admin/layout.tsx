@@ -86,6 +86,30 @@ export default function AdminLayout({
               User Management
             </Link>
             <Link 
+              href="/admin/reports" 
+              className={`block px-4 py-2 rounded ${
+                pathname === '/admin/reports' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Financial Reports
+            </Link>
+            <Link 
+              href="/admin/tenure-payout" 
+              className={`block px-4 py-2 rounded ${
+                pathname === '/admin/tenure-payout' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Tenure & Payouts
+            </Link>
+            <Link 
+              href="/admin/engagement" 
+              className={`block px-4 py-2 rounded ${
+                pathname === '/admin/engagement' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              Engagement
+            </Link>
+            <Link 
               href="/admin/audit-logs" 
               className={`block px-4 py-2 rounded ${
                 pathname === '/admin/audit-logs' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'

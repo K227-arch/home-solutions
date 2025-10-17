@@ -1,56 +1,36 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  content: [
-    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  darkMode: "class",
+  content: ["./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
       colors: {
-        border: "#d1d9e0",
-        input: "#eff2f5",
-        ring: "#00b4d8",
-        background: "#ffffff",
-        foreground: "#0a192f",
-        primary: {
-          DEFAULT: "#0077b6",
-          foreground: "#ffffff",
-        },
-        secondary: {
-          DEFAULT: "#00b4d8",
-          foreground: "#ffffff",
-        },
-        destructive: {
-          DEFAULT: "#ef4444",
-          foreground: "#ffffff",
-        },
-        muted: {
-          DEFAULT: "#94a3b8",
-          foreground: "#737f8d",
-        },
-        accent: {
-          DEFAULT: "#00b4d8",
-          foreground: "#ffffff",
-        },
-        popover: {
-          DEFAULT: "#fafafa",
-          foreground: "#0a192f",
-        },
-        card: {
-          DEFAULT: "#fafafa",
-          foreground: "#0a192f",
-        },
-        success: "#00f5a0",
-        warning: "#fbbf24",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        card: "hsl(var(--card))",
+        "card-foreground": "hsl(var(--card-foreground))",
+        popover: "hsl(var(--popover))",
+        "popover-foreground": "hsl(var(--popover-foreground))",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
+        secondary: "hsl(var(--secondary))",
+        "secondary-foreground": "hsl(var(--secondary-foreground))",
+        muted: "hsl(var(--muted))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
+        accent: "hsl(var(--accent))",
+        "accent-foreground": "hsl(var(--accent-foreground))",
+        destructive: "hsl(var(--destructive))",
+        "destructive-foreground": "hsl(var(--destructive-foreground))",
+        ring: "hsl(var(--ring))",
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
       },
       borderRadius: {
-        lg: "0.75rem",
-        md: "calc(0.75rem - 2px)",
-        sm: "calc(0.75rem - 4px)",
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
     },
   },
-  plugins: [],
 } satisfies Config;

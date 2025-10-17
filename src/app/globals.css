@@ -1,5 +1,96 @@
 @import "tailwindcss";
 
+@theme {
+  /* Map design tokens to Tailwind v4 theme variables so utilities like bg-background work */
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(210 100% 6%);
+
+  --color-card: hsl(0 0% 98%);
+  --color-card-foreground: hsl(210 100% 6%);
+
+  --color-popover: hsl(0 0% 98%);
+  --color-popover-foreground: hsl(210 100% 6%);
+
+  --color-primary: hsl(199 100% 36%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  --color-secondary: hsl(190 100% 42%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+
+  --color-muted: hsl(215 20% 50%);
+  --color-muted-foreground: hsl(215 20% 58%);
+
+  --color-accent: hsl(190 100% 42%);
+  --color-accent-foreground: hsl(0 0% 100%);
+
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  --color-success: hsl(158 100% 48%);
+  --color-warning: hsl(43 96% 56%);
+
+  --color-border: hsl(215 20% 85%);
+  --color-input: hsl(215 20% 95%);
+  --color-ring: hsl(190 100% 42%);
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* White Theme - Tenure Reward Program */
+    --background: 0 0% 100%;  /* #ffffff White */
+    --foreground: 210 100% 6%;  /* #0a192f Deep Navy */
+
+    --card: 0 0% 98%;  /* #fafafa Light Gray Card Background */
+    --card-foreground: 210 100% 6%;
+
+    --popover: 0 0% 98%;
+    --popover-foreground: 210 100% 6%;
+
+    --primary: 199 100% 36%;  /* #0077b6 Ocean Blue */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 190 100% 42%;  /* #00b4d8 Light Cyan */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 215 20% 50%;  /* #94a3b8 Slate */
+    --muted-foreground: 215 20% 58%;
+
+    --accent: 190 100% 42%;  /* #00b4d8 Light Cyan */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;  /* #ef4444 Error Red */
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 158 100% 48%;  /* #00f5a0 Success Green */
+    --warning: 43 96% 56%;  /* #fbbf24 Warning Yellow */
+
+    --border: 215 20% 85%;
+    --input: 215 20% 95%;
+    --ring: 190 100% 42%;
+
+    --radius: 0.75rem;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(0 0% 100%) 0%, hsl(0 0% 98%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(0 0% 98% / 0.9) 0%, hsl(0 0% 95% / 0.9) 100%);
+    --gradient-glow: radial-gradient(circle at center, hsl(190 100% 42% / 0.1) 0%, transparent 70%);
+
+    /* Shadows with glow */
+    --shadow-glow: 0 0 20px hsl(190 100% 42% / 0.2);
+    --shadow-glow-lg: 0 0 40px hsl(190 100% 42% / 0.3);
+    --shadow-card: 0 8px 32px hsl(0 0% 0% / 0.1);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
 body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
