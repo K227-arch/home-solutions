@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 type NewsItem = {
   id: string;
@@ -102,11 +103,11 @@ export default function EngagementManagement() {
           </label>
         </div>
         <div className="mb-2 flex items-center space-x-2">
-          <button onClick={() => exec('bold')} className="px-2 py-1 bg-gray-200 rounded">Bold</button>
-          <button onClick={() => exec('italic')} className="px-2 py-1 bg-gray-200 rounded">Italic</button>
-          <button onClick={() => exec('underline')} className="px-2 py-1 bg-gray-200 rounded">Underline</button>
-          <button onClick={() => exec('insertUnorderedList')} className="px-2 py-1 bg-gray-200 rounded">• List</button>
-          <button onClick={() => exec('insertOrderedList')} className="px-2 py-1 bg-gray-200 rounded">1. List</button>
+          <Button onClick={() => exec('bold')} size="sm" variant="outline">Bold</Button>
+          <Button onClick={() => exec('italic')} size="sm" variant="outline">Italic</Button>
+          <Button onClick={() => exec('underline')} size="sm" variant="outline">Underline</Button>
+          <Button onClick={() => exec('insertUnorderedList')} size="sm" variant="outline">• List</Button>
+          <Button onClick={() => exec('insertOrderedList')} size="sm" variant="outline">1. List</Button>
         </div>
         <div
           ref={editorRef}

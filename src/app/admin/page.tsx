@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -86,12 +87,8 @@ export default function AdminDashboard() {
       <div className="mt-8 bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-            Export User Data
-          </button>
-          <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-            View System Logs
-          </button>
+          <Button variant="secondary">Export User Data</Button>
+          <Button variant="secondary">View System Logs</Button>
         </div>
       </div>
     </div>

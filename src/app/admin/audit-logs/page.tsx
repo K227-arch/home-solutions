@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 type AuditLog = {
   id: string;
@@ -136,18 +137,19 @@ export default function AuditLogs() {
             <option value="user_deleted">User Deleted</option>
             <option value="role_updated">Role Updated</option>
           </select>
-          <button
+          <Button
             onClick={fetchLogs}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4"
           >
             Refresh
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={exportCsv}
-            className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
+            variant="outline"
+            size="sm"
           >
             Export CSV
-          </button>
+          </Button>
         </div>
       </div>
       

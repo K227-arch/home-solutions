@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 type UserRow = {
   id: string;
@@ -112,12 +113,12 @@ export default function TenurePayoutManagement() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Tenure & Payout Management</h1>
         <div className="flex items-center space-x-3">
-          <button onClick={calculateWinners} disabled={isCalculating} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-60">
+          <Button onClick={calculateWinners} disabled={isCalculating} variant="default">
             {isCalculating ? 'Calculating…' : 'Calculate Payouts'}
-          </button>
-          <button onClick={confirmPayouts} disabled={winners.length === 0} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-60">
+          </Button>
+          <Button onClick={confirmPayouts} disabled={winners.length === 0} variant="secondary">
             Confirm Payout Processing
-          </button>
+          </Button>
         </div>
       </div>
 

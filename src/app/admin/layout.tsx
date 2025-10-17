@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 export default function AdminLayout({
   children,
@@ -119,12 +120,13 @@ export default function AdminLayout({
             </Link>
           </nav>
           <div className="absolute bottom-4 left-4 w-56">
-            <button
+            <Button
               onClick={handleLogout}
-              className="w-full px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              variant="destructive"
+              className="w-full"
             >
               Logout
-            </button>
+            </Button>
           </div>
         </div>
         
