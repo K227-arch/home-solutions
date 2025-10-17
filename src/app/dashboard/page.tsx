@@ -168,7 +168,7 @@ export default function Dashboard() {
                 <div className="w-9 h-9 rounded-full bg-muted/20 flex items-center justify-center">
                   <UserIcon className="w-4 h-4" />
                 </div>
-                <span className="absolute -bottom-0.5 -right-0.5 inline-flex h-2.5 w-2.5 rounded-full bg-success ring-2 ring-white" />
+                <span className="absolute -bottom-0.5 -right-0.5 inline-flex h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ backgroundColor: 'hsl(var(--success))' }} />
               </div>
               <div>
                 <p className="text-sm font-medium">{userDisplayName}</p>
