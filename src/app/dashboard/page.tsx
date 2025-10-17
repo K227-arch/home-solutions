@@ -1,13 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Crown, Calendar, DollarSign, Users, Clock, TrendingUp } from 'lucide-react';
+import {
+  LayoutDashboard,
+  User as UserIcon,
+  CreditCard,
+  ListOrdered,
+  LineChart,
+  History as HistoryIcon,
+  Bell,
+  Settings as SettingsIcon,
+  LifeBuoy,
+  Crown,
+  Calendar,
+  DollarSign,
+  Users,
+  Clock,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
-import { QueueRow } from '@/components/QueueRow';
-import { NewsFeed } from '@/components/NewsFeed';
 import { createClient } from '@supabase/supabase-js';
 
 export default function Dashboard() {
@@ -21,24 +37,20 @@ export default function Dashboard() {
   const potentialWinners = useCounterAnimation(2, 800, 300);
   const daysUntilDraw = useCounterAnimation(45, 1000, 250);
   const paymentAmount = useCounterAnimation(25, 800, 150);
-  const queueCounter = useCounterAnimation(1, 500, 0);
 
-  // Mock data
+  // Mock data aligned to design
   const userData = {
-    memberId: "TRP-2024-001",
-    tenureStart: "January 1, 2025",
-    nextPaymentDue: "February 1, 2025",
+    memberId: 'TRP-2024-001',
+    tenureStart: 'January 1, 2025',
+    nextPaymentDue: 'February 1, 2025',
+    nextDrawDate: 'March 15, 2025',
   };
 
   const queueData = [
-    { rank: 1, name: "Alice Johnson", tenureMonths: 24, status: "Active" },
-    { rank: 2, name: "Bob Smith", tenureMonths: 22, status: "Active" },
-    { rank: 3, name: "John Doe", tenureMonths: 18, status: "Active", isCurrentUser: true },
-    { rank: 4, name: "Emma Wilson", tenureMonths: 15, status: "Active" },
-    { rank: 5, name: "Michael Brown", tenureMonths: 12, status: "Active" },
+    { rank: 1, name: 'Alice Johnson', tenureMonths: 24, status: 'Active' },
+    { rank: 2, name: 'Bob Smith', tenureMonths: 22, status: 'Active' },
+    { rank: 3, name: 'John Doe', tenureMonths: 18, status: 'Active', isCurrentUser: true },
   ];
-
-  // Activity feed replaced with NewsFeed component from Payload CMS
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -74,6 +86,21 @@ export default function Dashboard() {
     router.push('/login');
   };
 
+  const userDisplayName = useMemo(() => {
+    return (
+      user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Member'
+    );
+  }, [user]);
+
+  const currentUserRank = useMemo(() => {
+    const me = queueData.find((m) => m.isCurrentUser);
+    return me?.rank || 3;
+  }, [queueData]);
+
+  const fundTarget = 500_000;
+  const fundRemaining = Math.max(0, fundTarget - totalRevenue.count);
+  const fundProgressPct = Math.min(100, Math.round((totalRevenue.count / fundTarget) * 100));
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -86,202 +113,186 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="glass-card border-b sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+    <div className="min-h-screen bg-background flex">
+      {/* Sidebar */}
+      <aside className="w-64 border-r bg-card/70 backdrop-blur-sm flex flex-col justify-between">
+        <div className="px-4 py-4">
+          <div className="flex items-center gap-2 mb-6">
             <Crown className="w-6 h-6 text-accent" />
-            <h1 className="text-xl font-bold">Tenure</h1>
+            <span className="text-lg font-bold">Tenure</span>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            Sign Out
-          </Button>
+          <nav className="space-y-1">
+            <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 bg-primary/10 text-foreground">
+              <LayoutDashboard className="w-4 h-4 text-primary" />
+              <span className="font-medium">Dashboard</span>
+            </Link>
+            <Link href="/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <UserIcon className="w-4 h-4" />
+              <span>Profile</span>
+            </Link>
+            <Link href="/transactions" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <CreditCard className="w-4 h-4" />
+              <span>Transactions</span>
+            </Link>
+            <Link href="/queue" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <ListOrdered className="w-4 h-4" />
+              <span>Tenure Queue</span>
+              <Badge className="ml-auto" variant="secondary">LIVE</Badge>
+            </Link>
+            <Link href="/analytics" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <LineChart className="w-4 h-4" />
+              <span>Analytics</span>
+            </Link>
+            <Link href="/history" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <HistoryIcon className="w-4 h-4" />
+              <span>History</span>
+            </Link>
+            <Link href="/notifications" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <Bell className="w-4 h-4" />
+              <span>Notifications</span>
+            </Link>
+            <Link href="/settings" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <SettingsIcon className="w-4 h-4" />
+              <span>Settings</span>
+            </Link>
+            <Link href="/support" className="flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-muted/10">
+              <LifeBuoy className="w-4 h-4" />
+              <span>Help & Support</span>
+            </Link>
+          </nav>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="space-y-6">
-          {/* Mobile Priority Section - Compact Vertical Layout */}
-          <div className="lg:hidden space-y-3 mb-6">
-            {/* Compact Payout Fund & Payment Row */}
-            <div className="grid grid-cols-2 gap-3">
-              {/* Mini Payout Fund */}
-              <Card className="glass-card p-2 hover-glow">
-                <div className="text-center">
-                  <p className="text-xs text-purple-300 font-medium">Revenue</p>
-                  <p className="text-lg font-bold text-purple-400" ref={totalRevenue.ref}>
-                    ${totalRevenue.count.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-yellow-300 mt-1">{potentialWinners.count} Winners</p>
+        <div className="px-4 py-4 border-t">
+          <Card className="p-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <div className="w-9 h-9 rounded-full bg-muted/20 flex items-center justify-center">
+                  <UserIcon className="w-4 h-4" />
                 </div>
-              </Card>
-
-              {/* Mini Payment Card */}
-              <Card className="glass-card p-2 border-2 border-green-600 glow-blue">
-                <div className="text-center">
-                  <p className="text-xs text-red-300 font-medium">Payment Due</p>
-                  <p className="text-lg font-bold text-red-400" ref={paymentAmount.ref}>
-                    {daysUntilPayment.count}d
-                  </p>
-                  <p className="text-xs text-accent font-bold">${paymentAmount.count.toFixed(0)}</p>
-                </div>
-              </Card>
+                <span className="absolute -bottom-0.5 -right-0.5 inline-flex h-2.5 w-2.5 rounded-full ring-2 ring-white" style={{ backgroundColor: 'hsl(var(--success))' }} />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{userDisplayName}</p>
+                <p className="text-xs text-muted-foreground">{userData.memberId}</p>
+              </div>
             </div>
+          </Card>
+        </div>
+      </aside>
 
-            {/* Compact Countdown */}
-            <Card className="glass-card p-2 bg-red-900/50 border border-red-600 countdown-pulse">
-              <div className="text-center">
-                <p className="text-xs text-red-300 font-medium">12 Month Payout Countdown</p>
-                <p className="text-lg font-bold text-red-400 tracking-wider" ref={daysUntilDraw.ref}>
-                  {daysUntilDraw.count} DAYS
-                </p>
+      {/* Main */}
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto py-6 px-6">
+          {/* Header */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-bold">Dashboard</h1>
+              <p className="text-sm text-muted-foreground">Welcome back, {userDisplayName}</p>
+              <p className="text-xs text-muted-foreground">Member ID: {userData.memberId}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Button variant="outline" size="sm" onClick={handleSignOut}>Sign Out</Button>
+            </div>
+          </div>
+
+          {/* Stat cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-secondary p-2">
+                  <Clock className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Days until Payment</p>
+                  <p className="text-xl font-bold" ref={daysUntilPayment.ref}>{daysUntilPayment.count}</p>
+                </div>
               </div>
             </Card>
-
-            {/* Mobile Payment Button */}
-            <Button className="w-full py-3 bg-green-500 hover:bg-green-600 text-gray-900 font-bold rounded-xl shadow-xl transition duration-150 transform hover:scale-[1.02] text-sm">
-              PROCESS $25.00 MONTHLY FEE NOW
-            </Button>
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-secondary p-2">
+                  <Users className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Queue Position</p>
+                  <p className="text-xl font-bold">#{currentUserRank}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-secondary p-2">
+                  <DollarSign className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Total Fund</p>
+                  <p className="text-xl font-bold" ref={totalRevenue.ref}>${totalRevenue.count.toLocaleString()}</p>
+                </div>
+              </div>
+            </Card>
+            <Card className="p-4">
+              <div className="flex items-center gap-3">
+                <div className="rounded-full bg-secondary p-2">
+                  <Calendar className="w-4 h-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Next Draw</p>
+                  <p className="text-xl font-bold" ref={daysUntilDraw.ref}>{daysUntilDraw.count} days</p>
+                </div>
+              </div>
+            </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            {/* Left Column - 2/3 */}
-            <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-              {/* Tenure Queue - Moved to top */}
-              <Card className="glass-card p-3 sm:p-6">
-                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <Users className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-                  Tenure Queue
-                </h2>
-                <div className="overflow-x-auto" ref={queueCounter.ref}>
-                  <table className="w-full min-w-[400px]">
-                    <thead className="border-b border-border">
-                      <tr className="text-left text-xs sm:text-sm text-muted-foreground">
-                        <th className="pb-2 sm:pb-3 pr-2">Rank</th>
-                        <th className="pb-2 sm:pb-3 pr-2">Member</th>
-                        <th className="pb-2 sm:pb-3 pr-2">Tenure</th>
-                        <th className="pb-2 sm:pb-3 text-right">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {queueData.map((member, index) => (
-                        <QueueRow
-                          key={member.rank}
-                          rank={member.rank}
-                          name={member.name}
-                          tenureMonths={member.tenureMonths}
-                          status={member.status}
-                          isCurrentUser={member.isCurrentUser}
-                          index={index}
-                        />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
+          {/* Fund Progress */}
+          <Card className="p-6 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Badge variant="secondary">Fund Progress</Badge>
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm text-muted-foreground">{fundProgressPct}% complete</p>
+              <p className="text-sm text-muted-foreground">${totalRevenue.count.toLocaleString()} / ${fundTarget.toLocaleString()}</p>
+            </div>
+            <Progress value={fundProgressPct} />
+            <p className="text-xs text-muted-foreground mt-2">Need ${fundRemaining.toLocaleString()} more for next draw</p>
+          </Card>
 
-              {/* Status Cards - Moved below queue */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                <Card className="glass-card p-4 sm:p-6 hover-glow group border-indigo-600">
-                  <div className="space-y-1 sm:space-y-2">
-                    <p className="text-xs sm:text-sm text-indigo-300 font-medium">Anonymous Member ID</p>
-                    <p className="text-lg sm:text-2xl font-mono font-bold text-white group-hover:glow-blue transition-all break-all">
-                      {userData.memberId}
-                    </p>
-                    <p className="text-xs text-indigo-400 hidden sm:block">Unique identifier for system use.</p>
+          {/* Your Queue Status */}
+          <Card className="p-6 mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="w-4 h-4 text-primary" />
+              <h2 className="text-lg font-semibold">Your Queue Status</h2>
+            </div>
+            <ul className="space-y-3">
+              {queueData.map((m) => (
+                <li key={m.rank} className={`flex items-center justify-between rounded-lg border p-3 ${m.isCurrentUser ? 'bg-primary/5 border-primary/40' : 'bg-card'}`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-semibold ${m.isCurrentUser ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'}`}>{m.rank}</div>
+                    <div>
+                      <p className="text-sm font-medium">{m.name}</p>
+                      <p className="text-xs text-muted-foreground">{m.tenureMonths} months</p>
+                    </div>
                   </div>
-                </Card>
+                  <div className="text-sm font-medium">{m.status}</div>
+                </li>
+              ))}
+            </ul>
+          </Card>
 
-                <Card className="glass-card p-4 sm:p-6 hover-glow group border-green-600">
-                  <div className="space-y-1 sm:space-y-2">
-                    <p className="text-xs sm:text-sm text-green-300 font-medium flex items-center gap-1 sm:gap-2">
-                      <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Tenure Start Date
-                    </p>
-                    <p className="text-base sm:text-lg font-bold text-white">{userData.tenureStart}</p>
-                    <p className="text-xs text-green-400 hidden sm:block">Tenure is calculated to the millisecond.</p>
-                  </div>
-                </Card>
-
-                <Card className="glass-card p-4 sm:p-6 hover-glow group border-red-600 sm:col-span-2 lg:col-span-1">
-                  <div className="space-y-1 sm:space-y-2">
-                    <p className="text-xs sm:text-sm text-red-300 font-medium flex items-center gap-1 sm:gap-2">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                      Next Payment Due (Critical)
-                    </p>
-                    <p className="text-base sm:text-lg font-bold text-red-400" ref={daysUntilPayment.ref}>{daysUntilPayment.count} days</p>
-                    <p className="text-xs text-red-400">Defaulting means instant loss of rank! ($25.00)</p>
-                  </div>
-                </Card>
+          {/* Bottom cards: Next Payment & Next Draw */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="p-6">
+              <p className="text-xs text-muted-foreground">Due: {userData.nextPaymentDue}</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-2xl font-bold">${paymentAmount.count.toFixed(2)}</p>
+                <Button className="rounded-lg">Make Payment</Button>
               </div>
-
-              {/* News & Announcements Feed */}
-              <Card className="glass-card p-6">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-accent" />
-                  News & Announcements
-                </h2>
-                <NewsFeed limit={5} />
-              </Card>
-            </div>
-
-            {/* Right Column - 1/3 (Desktop Only) */}
-            <div className="hidden lg:block space-y-6">
-              {/* Payout Fund Tracker */}
-              <Card className="glass-card p-3 sm:p-6 hover-glow">
-                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 flex items-center gap-2">
-                  <DollarSign className="w-4 h-4 sm:w-5 sm:h-5 text-accent" />
-                  💰 Payout Fund Tracker
-                </h2>
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="p-3 sm:p-4 bg-purple-900/50 rounded-lg border border-purple-600">
-                    <p className="text-xs sm:text-sm text-purple-300 font-medium">Current Revenue Collected</p>
-                    <p className="text-2xl sm:text-4xl font-bold text-purple-400 mt-1" ref={totalRevenue.ref}>
-                      ${totalRevenue.count.toLocaleString()}.00
-                    </p>
-                  </div>
-
-                  <div className="p-3 sm:p-4 bg-yellow-900/50 rounded-lg border-2 border-yellow-500">
-                    <p className="text-xs sm:text-sm text-yellow-300 font-medium">Potential Winners Funded</p>
-                    <p className="text-2xl sm:text-4xl font-bold text-yellow-400 mt-1" ref={potentialWinners.ref}>
-                      {potentialWinners.count} Winners
-                    </p>
-                    <p className="text-xs text-yellow-500 mt-1 hidden sm:block">The top {potentialWinners.count} tenured members' prizes are currently covered.</p>
-                  </div>
-
-                  <div className="text-center p-2 sm:p-3 bg-red-900/50 rounded-lg border border-red-600 countdown-pulse">
-                    <p className="text-xs sm:text-sm text-red-300 font-medium">12 Month Payout Countdown:</p>
-                    <p className="text-xl sm:text-3xl font-bold text-red-400 tracking-wider" ref={daysUntilDraw.ref}>
-                      {daysUntilDraw.count} DAYS
-                    </p>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Payment Card */}
-              <Card className="glass-card p-3 sm:p-6 border-2 border-green-600 glow-blue">
-                <h2 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4">Time to Renew?</h2>
-                <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4">Secure your position by ensuring your next payment is processed on time.</p>
-                <div className="space-y-3 sm:space-y-4">
-                  <div className="text-center py-2 sm:py-4">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Next payment in</p>
-                    <p className="text-xl sm:text-3xl font-bold text-red-400 my-1 sm:my-2" ref={paymentAmount.ref}>
-                      {daysUntilPayment.count} Days
-                    </p>
-                    <p className="text-lg sm:text-2xl font-bold text-accent">${paymentAmount.count.toFixed(2)}</p>
-                  </div>
-
-                  <Button className="w-full py-3 sm:py-4 px-3 sm:px-4 bg-green-500 hover:bg-green-600 text-gray-900 font-bold sm:font-extrabold rounded-xl shadow-xl transition duration-150 transform hover:scale-[1.02] text-sm sm:text-base" size="lg">
-                    PROCESS $25.00 MONTHLY FEE NOW
-                  </Button>
-
-                  <p className="text-xs text-center text-muted-foreground">
-                    Auto-renewal status: **Active** (Update Payment Method)
-                  </p>
-                </div>
-              </Card>
-            </div>
+            </Card>
+            <Card className="p-6">
+              <p className="text-xs text-muted-foreground">Date: {userData.nextDrawDate}</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-2xl font-bold" ref={potentialWinners.ref}>{potentialWinners.count} winners</p>
+                <Button variant="outline" className="rounded-lg">View Details</Button>
+              </div>
+            </Card>
           </div>
         </div>
       </main>

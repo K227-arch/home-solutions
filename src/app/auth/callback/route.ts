@@ -40,6 +40,24 @@ export async function GET(request: NextRequest) {
         console.error('Auth callback: exchangeCodeForSession failed', exchangeError);
       }
 
+      // Ensure a profile row exists for this user (app-side upsert)
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const userId = session?.user?.id;
+        if (userId) {
+          const meta: any = session?.user?.user_metadata || {};
+          const payload = {
+            id: userId,
+            full_name: meta.full_name ?? null,
+            phone: meta.phone ?? null,
+            address: meta.address ?? null,
+          };
+          await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
+        }
+      } catch (e) {
+        console.error('Auth callback: profile upsert failed', e);
+      }
+
       // Determine redirect target based on role
       let redirectPath = '/dashboard';
       try {
