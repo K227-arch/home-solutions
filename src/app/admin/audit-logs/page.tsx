@@ -18,6 +18,7 @@ export default function AuditLogs() {
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [query, setQuery] = useState('');
 
   useEffect(() => {
     fetchLogs();
@@ -75,6 +76,34 @@ export default function AuditLogs() {
     }
   };
 
+  const displayLogs = logs.filter(l => {
+    const q = query.toLowerCase();
+    if (!q) return true;
+    return (
+      (l.user_email || '').toLowerCase().includes(q) ||
+      (l.action || '').toLowerCase().includes(q)
+    );
+  });
+
+  const exportCsv = () => {
+    const rows = displayLogs.map(l => ({
+      timestamp: l.created_at,
+      user: l.user_email,
+      action: l.action,
+      ip: l.ip_address || '',
+      details: l.metadata ? JSON.stringify(l.metadata) : '',
+    }));
+    const headers = Object.keys(rows[0] || { timestamp: '', user: '', action: '', ip: '', details: '' });
+    const csv = [headers.join(','), ...rows.map(r => headers.map(h => `"${String(r[h as keyof typeof r] || '').replace(/"/g, '""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'audit_logs.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -88,6 +117,13 @@ export default function AuditLogs() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Audit Logs</h1>
         <div className="flex items-center space-x-4">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search user or action"
+            className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          />
           <select
             className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             value={filter}
@@ -106,6 +142,12 @@ export default function AuditLogs() {
           >
             Refresh
           </button>
+          <button
+            onClick={exportCsv}
+            className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-gray-900"
+          >
+            Export CSV
+          </button>
         </div>
       </div>
       
@@ -121,7 +163,7 @@ export default function AuditLogs() {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {logs.map((log) => (
+            {displayLogs.map((log) => (
               <tr key={log.id}>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(log.created_at).toLocaleString()}

@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+@theme {
+  /* Map design tokens to Tailwind v4 theme variables so utilities like bg-background work */
+  --color-background: hsl(0 0% 100%);
+  --color-foreground: hsl(210 100% 6%);
+
+  --color-card: hsl(0 0% 98%);
+  --color-card-foreground: hsl(210 100% 6%);
+
+  --color-popover: hsl(0 0% 98%);
+  --color-popover-foreground: hsl(210 100% 6%);
+
+  --color-primary: hsl(199 100% 36%);
+  --color-primary-foreground: hsl(0 0% 100%);
+
+  --color-secondary: hsl(190 100% 42%);
+  --color-secondary-foreground: hsl(0 0% 100%);
+
+  --color-muted: hsl(215 20% 50%);
+  --color-muted-foreground: hsl(215 20% 58%);
+
+  --color-accent: hsl(190 100% 42%);
+  --color-accent-foreground: hsl(0 0% 100%);
+
+  --color-destructive: hsl(0 84% 60%);
+  --color-destructive-foreground: hsl(0 0% 100%);
+
+  --color-success: hsl(158 100% 48%);
+  --color-warning: hsl(43 96% 56%);
+
+  --color-border: hsl(215 20% 85%);
+  --color-input: hsl(215 20% 95%);
+  --color-ring: hsl(190 100% 42%);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
 */
