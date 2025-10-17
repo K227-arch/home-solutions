@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useCounterAnimation } from '@/hooks/use-counter-animation';
 import { QueueRow } from '@/components/QueueRow';
+import { NewsFeed } from '@/components/NewsFeed';
 import { createClient } from '@supabase/supabase-js';
 
 export default function Dashboard() {
@@ -37,11 +38,7 @@ export default function Dashboard() {
     { rank: 5, name: "Michael Brown", tenureMonths: 12, status: "Active" },
   ];
 
-  const activityFeed = [
-    { title: "Milestone Reached", message: "$250,000 collected — 2 winners funded!", timestamp: "2 hours ago" },
-    { title: "Payment Processed", message: "Your monthly payment of $25 was successful", timestamp: "1 day ago" },
-    { title: "Queue Update", message: "You moved up 2 positions in the tenure queue", timestamp: "3 days ago" },
-  ];
+  // Activity feed replaced with NewsFeed component from Payload CMS
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -219,30 +216,13 @@ export default function Dashboard() {
                 </Card>
               </div>
 
-              {/* Activity Feed */}
+              {/* News & Announcements Feed */}
               <Card className="glass-card p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <TrendingUp className="w-5 h-5 text-accent" />
-                  Activity Feed
+                  News & Announcements
                 </h2>
-                <div className="space-y-3">
-                  {activityFeed.map((activity, index) => (
-                    <div
-                      key={index}
-                      className="p-4 rounded-lg bg-background/50 hover:bg-accent/5 transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold group-hover:text-accent transition-colors">
-                            {activity.title}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">{activity.message}</p>
-                        </div>
-                        <span className="text-xs text-muted-foreground">{activity.timestamp}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <NewsFeed limit={5} />
               </Card>
             </div>
 
