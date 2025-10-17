@@ -4,10 +4,22 @@ import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
+interface LexicalNode {
+  text?: string
+  children?: LexicalNode[]
+}
+
+interface LexicalContent {
+  root?: {
+    children?: LexicalNode[]
+  }
+  children?: LexicalNode[]
+}
+
 interface NewsPost {
   id: number
   title: string
-  content: any // Lexical JSON format
+  content: LexicalContent
   publish_date: string
   priority: 'Low' | 'Normal' | 'High' | 'Urgent'
   createdAt: string
@@ -43,9 +55,9 @@ export function NewsFeed({ limit = 5, className = '' }: NewsFeedProps) {
         } else {
           throw new Error(result.error || 'Failed to load news')
         }
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error fetching news:', err)
-        setError(err.message)
+        setError(err instanceof Error ? err.message : 'Failed to fetch news')
       } finally {
         setIsLoading(false)
       }
@@ -77,7 +89,7 @@ export function NewsFeed({ limit = 5, className = '' }: NewsFeedProps) {
   }
 
   // Simple function to extract text from Lexical JSON
-  const extractTextFromLexical = (content: any): string => {
+  const extractTextFromLexical = (content: LexicalContent): string => {
     if (!content) return ''
 
     try {
@@ -85,10 +97,10 @@ export function NewsFeed({ limit = 5, className = '' }: NewsFeedProps) {
       const root = content.root || content
       if (root.children && Array.isArray(root.children)) {
         return root.children
-          .map((node: any) => {
+          .map((node: LexicalNode) => {
             if (node.children && Array.isArray(node.children)) {
               return node.children
-                .map((child: any) => child.text || '')
+                .map((child: LexicalNode) => child.text || '')
                 .join('')
             }
             return node.text || ''

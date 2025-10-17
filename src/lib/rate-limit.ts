@@ -53,7 +53,7 @@ const apiLimiter = new RateLimiter(20, 60 * 1000); // 20 requests per minute
 
 // Middleware function for rate limiting
 export function rateLimitMiddleware(req: NextRequest) {
-  const ip = req.ip || 'unknown';
+  const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
   const path = req.nextUrl.pathname;
   
   // Select appropriate limiter based on path

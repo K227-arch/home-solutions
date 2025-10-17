@@ -10,16 +10,9 @@ class Logger {
     this.context = context;
   }
   
-  private log(level: LogLevel, message: string, meta?: any): void {
+  private log(level: LogLevel, message: string, meta?: unknown): void {
     const timestamp = new Date().toISOString();
-    const logEntry = {
-      timestamp,
-      level,
-      context: this.context,
-      message,
-      ...(meta ? { meta } : {}),
-    };
-    
+
     // In development, log to console
     if (process.env.NODE_ENV !== 'production') {
       const consoleMethod = level === 'error' ? 'error' : 
@@ -38,19 +31,19 @@ class Logger {
     }
   }
   
-  debug(message: string, meta?: any): void {
+  debug(message: string, meta?: unknown): void {
     this.log('debug', message, meta);
   }
-  
-  info(message: string, meta?: any): void {
+
+  info(message: string, meta?: unknown): void {
     this.log('info', message, meta);
   }
-  
-  warn(message: string, meta?: any): void {
+
+  warn(message: string, meta?: unknown): void {
     this.log('warn', message, meta);
   }
-  
-  error(message: string, meta?: any): void {
+
+  error(message: string, meta?: unknown): void {
     this.log('error', message, meta);
   }
 }

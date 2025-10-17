@@ -12,6 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { COUNTRY_DIAL_CODES } from '@/lib/countryDialCodes';
 import { supabase } from '@/lib/supabase';
 
+export const dynamic = 'force-dynamic';
+
 // US States data
 const usStates = [
   { value: "AL", label: "Alabama" }, { value: "AK", label: "Alaska" }, { value: "AZ", label: "Arizona" },
@@ -113,8 +115,8 @@ export default function SignUp() {
 
       // Redirect to login with success message
       router.push('/login?message=Account created! Check your email to verify your account.');
-    } catch (error: any) {
-      setServerError(error.message || 'An error occurred during sign up');
+    } catch (error) {
+      setServerError(error instanceof Error ? error.message : 'An error occurred during sign up');
     } finally {
       setIsLoading(false);
     }

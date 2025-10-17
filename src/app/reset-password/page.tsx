@@ -11,6 +11,8 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { resetPasswordSchema, ResetPasswordFormValues } from '@/lib/validations';
 
+export const dynamic = 'force-dynamic';
+
 export default function ResetPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export default function ResetPasswordPage() {
 
     try {
       // Attempt password update using the recovery session
-      const { data, error } = await supabase.auth.updateUser({ password: form.password });
+      const { error } = await supabase.auth.updateUser({ password: form.password });
       if (error) throw error;
 
       // Log successful reset for audit purposes
@@ -64,8 +66,8 @@ export default function ResetPasswordPage() {
         router.replace('/login');
         router.refresh();
       }, 1500);
-    } catch (err: any) {
-      setServerError(err.message || 'Invalid or expired reset link. Request a new one.');
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'Invalid or expired reset link. Request a new one.');
     } finally {
       setIsLoading(false);
     }

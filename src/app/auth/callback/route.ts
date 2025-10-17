@@ -24,10 +24,10 @@ export async function GET(request: NextRequest) {
         {
           cookies: {
             get: (name: string) => request.cookies.get(name)?.value,
-            set: (name: string, value: string, options: any) => {
+            set: (name: string, value: string, options: Record<string, unknown>) => {
               res.cookies.set({ name, value, ...options });
             },
-            remove: (name: string, options: any) => {
+            remove: (name: string, options: Record<string, unknown>) => {
               res.cookies.set({ name, value: '', ...options });
             },
           },
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         const { data: { session } } = await supabase.auth.getSession();
         const userId = session?.user?.id;
         if (userId) {
-          const meta: any = session?.user?.user_metadata || {};
+          const meta = session?.user?.user_metadata || {};
           const payload = {
             id: userId,
             full_name: meta.full_name ?? null,

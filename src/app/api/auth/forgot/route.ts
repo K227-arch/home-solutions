@@ -49,10 +49,10 @@ export async function POST(request: NextRequest) {
       {
         cookies: {
           get: (name: string) => req.cookies.get(name)?.value,
-          set: (name: string, value: string, options: any) => {
+          set: (name: string, value: string, options: Record<string, unknown>) => {
             res.cookies.set({ name, value, ...options });
           },
-          remove: (name: string, options: any) => {
+          remove: (name: string, options: Record<string, unknown>) => {
             res.cookies.set({ name, value: '', ...options });
           },
         },
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       ? `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`
       : new URL('/reset-password', req.url).toString();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(body.email, {
+    await supabase.auth.resetPasswordForEmail(body.email, {
       redirectTo: redirectUrl,
     });
 

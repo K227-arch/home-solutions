@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -64,8 +64,8 @@ export default function ForgotPasswordPage() {
       }
       setServerMessage(payload?.message || 'If an account exists, a reset link has been sent.');
       reset();
-    } catch (err: any) {
-      setServerError(err.message || 'Failed to request password reset');
+    } catch (err) {
+      setServerError(err instanceof Error ? err.message : 'Failed to request password reset');
     } finally {
       setIsLoading(false);
     }

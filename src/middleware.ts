@@ -86,7 +86,7 @@ export async function middleware(req: NextRequest) {
       if (roleData?.role === 'admin') {
         redirectPath = '/admin';
       }
-    } catch (e) {
+    } catch {
       // Fallback to dashboard on any error
       redirectPath = '/dashboard';
     }

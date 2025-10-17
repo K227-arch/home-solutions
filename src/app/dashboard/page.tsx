@@ -27,7 +27,7 @@ import { useCounterAnimation } from '@/hooks/use-counter-animation';
 import { createClient } from '@supabase/supabase-js';
 
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ user_metadata?: { full_name?: string }; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
