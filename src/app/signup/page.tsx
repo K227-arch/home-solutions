@@ -1,18 +1,36 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Crown, Check } from 'lucide-react';
-import { SignUpFormValues, signUpSchema } from '@/lib/validations';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
-import PasswordStrength from '@/components/ui/PasswordStrength';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { supabase } from '@/lib/supabase';
+
+// US States data
+const usStates = [
+  { value: "AL", label: "Alabama" }, { value: "AK", label: "Alaska" }, { value: "AZ", label: "Arizona" },
+  { value: "AR", label: "Arkansas" }, { value: "CA", label: "California" }, { value: "CO", label: "Colorado" },
+  { value: "CT", label: "Connecticut" }, { value: "DE", label: "Delaware" }, { value: "FL", label: "Florida" },
+  { value: "GA", label: "Georgia" }, { value: "HI", label: "Hawaii" }, { value: "ID", label: "Idaho" },
+  { value: "IL", label: "Illinois" }, { value: "IN", label: "Indiana" }, { value: "IA", label: "Iowa" },
+  { value: "KS", label: "Kansas" }, { value: "KY", label: "Kentucky" }, { value: "LA", label: "Louisiana" },
+  { value: "ME", label: "Maine" }, { value: "MD", label: "Maryland" }, { value: "MA", label: "Massachusetts" },
+  { value: "MI", label: "Michigan" }, { value: "MN", label: "Minnesota" }, { value: "MS", label: "Mississippi" },
+  { value: "MO", label: "Missouri" }, { value: "MT", label: "Montana" }, { value: "NE", label: "Nebraska" },
+  { value: "NV", label: "Nevada" }, { value: "NH", label: "New Hampshire" }, { value: "NJ", label: "New Jersey" },
+  { value: "NM", label: "New Mexico" }, { value: "NY", label: "New York" }, { value: "NC", label: "North Carolina" },
+  { value: "ND", label: "North Dakota" }, { value: "OH", label: "Ohio" }, { value: "OK", label: "Oklahoma" },
+  { value: "OR", label: "Oregon" }, { value: "PA", label: "Pennsylvania" }, { value: "RI", label: "Rhode Island" },
+  { value: "SC", label: "South Carolina" }, { value: "SD", label: "South Dakota" }, { value: "TN", label: "Tennessee" },
+  { value: "TX", label: "Texas" }, { value: "UT", label: "Utah" }, { value: "VT", label: "Vermont" },
+  { value: "VA", label: "Virginia" }, { value: "WA", label: "Washington" }, { value: "WV", label: "West Virginia" },
+  { value: "WI", label: "Wisconsin" }, { value: "WY", label: "Wyoming" },
+];
 
 export default function SignUp() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,44 +38,80 @@ export default function SignUp() {
   const [step, setStep] = useState(1);
   const router = useRouter();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-  } = useForm<SignUpFormValues>({
-    resolver: zodResolver(signUpSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-      confirmPassword: '',
-    },
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    phoneCountryCode: "+1",
+    phoneNumber: "",
+    streetAddress: "",
+    city: "",
+    state: "",
+    zipCode: "",
+    agreeToTerms: false,
   });
 
-  const password = watch('password');
-
-  const handleStepOne = () => {
-    if (!errors.email && !errors.password && !errors.confirmPassword) {
-      setStep(2);
-    }
+  const handleInputChange = (field: string, value: string | boolean) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const onSubmit = async (data: SignUpFormValues) => {
+  const handleStepOne = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      setServerError("Passwords do not match");
+      return;
+    }
+    if (!formData.phoneNumber.trim()) {
+      setServerError("Phone number is required");
+      return;
+    }
+    if (!formData.streetAddress.trim() || !formData.city.trim() || !formData.state || !formData.zipCode.trim()) {
+      setServerError("All address fields are required");
+      return;
+    }
+    setServerError(null);
+    setStep(2);
+  };
+
+  const handleStepTwo = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.agreeToTerms) {
+      setServerError("Please agree to Terms & Conditions");
+      return;
+    }
+    setServerError(null);
+    setStep(3);
+  };
+
+  const handleFinalSubmit = async () => {
     setIsLoading(true);
     setServerError(null);
 
     try {
+      // Create Supabase user
       const { error } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+        email: formData.email,
+        password: formData.password,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            full_name: formData.fullName,
+            phone: `${formData.phoneCountryCode}${formData.phoneNumber}`,
+            address: {
+              street: formData.streetAddress,
+              city: formData.city,
+              state: formData.state,
+              zip: formData.zipCode,
+            },
+          },
         },
       });
 
       if (error) throw error;
 
-      router.push('/login?message=Check your email to confirm your account');
+      // Redirect to login with success message
+      router.push('/login?message=Account created! Check your email to verify your account.');
     } catch (error: any) {
       setServerError(error.message || 'An error occurred during sign up');
     } finally {
@@ -84,7 +138,7 @@ export default function SignUp() {
 
         {/* Progress Indicator */}
         <div className="flex items-center justify-center gap-2 mb-8">
-          {[1, 2].map((i) => (
+          {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center">
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-300 ${
@@ -95,7 +149,7 @@ export default function SignUp() {
               >
                 {step > i ? <Check className="w-5 h-5" /> : i}
               </div>
-              {i < 2 && (
+              {i < 3 && (
                 <div
                   className={`w-12 h-1 mx-1 transition-all duration-300 ${
                     step > i ? "bg-accent" : "bg-border"
@@ -106,6 +160,13 @@ export default function SignUp() {
           ))}
         </div>
 
+        {/* Error Message */}
+        {serverError && (
+          <div className="mb-6 p-4 bg-destructive/10 border-l-4 border-destructive rounded-r-lg">
+            <p className="text-sm text-destructive font-medium">{serverError}</p>
+          </div>
+        )}
+
         {/* Step 1: Account Info */}
         {step === 1 && (
           <>
@@ -114,25 +175,119 @@ export default function SignUp() {
               <p className="text-muted-foreground">Enter your information</p>
             </div>
 
-            {serverError && (
-              <div className="mb-6 p-4 bg-destructive/10 border-l-4 border-destructive rounded-r-lg">
-                <p className="text-sm text-destructive font-medium">{serverError}</p>
+            <form onSubmit={handleStepOne} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input
+                  id="fullName"
+                  placeholder="John Doe"
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange("fullName", e.target.value)}
+                  className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
+                />
               </div>
-            )}
 
-            <form onSubmit={handleSubmit(handleStepOne)} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  {...register('email')}
+                  value={formData.email}
+                  onChange={(e) => handleInputChange("email", e.target.value)}
                   className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
                 />
-                {errors.email && (
-                  <p className="text-sm text-destructive font-medium">{errors.email.message}</p>
-                )}
+              </div>
+
+              {/* Phone Number */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={formData.phoneCountryCode}
+                    onValueChange={(value) => handleInputChange("phoneCountryCode", value)}
+                  >
+                    <SelectTrigger className="w-24 bg-background/50 border-border focus:border-accent">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="+1">+1</SelectItem>
+                      <SelectItem value="+44">+44</SelectItem>
+                      <SelectItem value="+33">+33</SelectItem>
+                      <SelectItem value="+49">+49</SelectItem>
+                      <SelectItem value="+81">+81</SelectItem>
+                      <SelectItem value="+86">+86</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                    value={formData.phoneNumber}
+                    onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
+                    className="flex-1 bg-background/50 border-border focus:border-accent transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Address Fields */}
+              <div className="space-y-2">
+                <Label htmlFor="streetAddress">Street Address</Label>
+                <Input
+                  id="streetAddress"
+                  placeholder="123 Main St"
+                  value={formData.streetAddress}
+                  onChange={(e) => handleInputChange("streetAddress", e.target.value)}
+                  className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    placeholder="New York"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange("city", e.target.value)}
+                    className="bg-background/50 border-border focus:border-accent transition-colors"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Select
+                    value={formData.state}
+                    onValueChange={(value) => handleInputChange("state", value)}
+                  >
+                    <SelectTrigger className="bg-background/50 border-border focus:border-accent">
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {usStates.map((state) => (
+                        <SelectItem key={state.value} value={state.value}>
+                          {state.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Input
+                  id="zipCode"
+                  placeholder="10001"
+                  value={formData.zipCode}
+                  onChange={(e) => handleInputChange("zipCode", e.target.value)}
+                  className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
+                />
               </div>
 
               <div className="space-y-2">
@@ -141,14 +296,11 @@ export default function SignUp() {
                   id="password"
                   type="password"
                   placeholder="••••••••"
-                  autoComplete="new-password"
-                  {...register('password')}
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
                   className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
                 />
-                {password && <PasswordStrength password={password} />}
-                {errors.password && (
-                  <p className="text-sm text-destructive font-medium">{errors.password.message}</p>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -157,13 +309,11 @@ export default function SignUp() {
                   id="confirmPassword"
                   type="password"
                   placeholder="••••••••"
-                  autoComplete="new-password"
-                  {...register('confirmPassword')}
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
                   className="bg-background/50 border-border focus:border-accent transition-colors"
+                  required
                 />
-                {errors.confirmPassword && (
-                  <p className="text-sm text-destructive font-medium">{errors.confirmPassword.message}</p>
-                )}
               </div>
 
               <Button type="submit" className="w-full bg-primary hover:glow-blue-lg" size="lg">
@@ -173,36 +323,42 @@ export default function SignUp() {
           </>
         )}
 
-        {/* Step 2: Confirmation & Submit */}
+        {/* Step 2: Payment Consent */}
         {step === 2 && (
           <>
             <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold mb-2">Confirm Registration</h1>
-              <p className="text-muted-foreground">Review and create your account</p>
+              <h1 className="text-2xl font-bold mb-2">Joining Fee</h1>
+              <p className="text-muted-foreground">One-time membership fee</p>
             </div>
 
-            <div className="space-y-6">
-              <div className="p-4 rounded-lg bg-background/50 space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Email:</span>
-                  <span className="font-medium">{watch('email')}</span>
+            <form onSubmit={handleStepTwo} className="space-y-6">
+              <Card className="p-6 border-2 border-accent glow-blue">
+                <div className="text-center space-y-2">
+                  <p className="text-muted-foreground">Membership Fee</p>
+                  <p className="text-5xl font-bold text-accent">$300</p>
+                  <p className="text-sm text-muted-foreground">One-time payment</p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  <p className="mb-2">You will receive a confirmation email to verify your account.</p>
-                </div>
-              </div>
+              </Card>
 
-              <div className="p-4 rounded-lg bg-accent/5 border border-accent/20">
-                <p className="text-sm text-center text-muted-foreground">
-                  By creating an account, you agree to our{" "}
-                  <Link href="/terms" className="text-accent hover:underline">
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" className="text-accent hover:underline">
-                    Privacy Policy
-                  </Link>
-                </p>
+              <div className="space-y-4">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formData.agreeToTerms}
+                    onChange={(e) => handleInputChange("agreeToTerms", e.target.checked)}
+                    className="w-5 h-5 mt-0.5 rounded border-border"
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    I agree to the{" "}
+                    <Link href="/terms" className="text-accent hover:underline">
+                      Terms & Conditions
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" className="text-accent hover:underline">
+                      Privacy Policy
+                    </Link>
+                  </span>
+                </label>
               </div>
 
               <div className="flex gap-3">
@@ -214,13 +370,65 @@ export default function SignUp() {
                 >
                   Back
                 </Button>
+                <Button type="submit" className="w-full bg-primary hover:glow-blue-lg" size="lg">
+                  Continue
+                </Button>
+              </div>
+            </form>
+          </>
+        )}
+
+        {/* Step 3: Confirmation */}
+        {step === 3 && (
+          <>
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold mb-2">Almost There!</h1>
+              <p className="text-muted-foreground">Complete your registration</p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="p-4 rounded-lg bg-background/50 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Name:</span>
+                  <span className="font-medium">{formData.fullName}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Email:</span>
+                  <span className="font-medium">{formData.email}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Phone:</span>
+                  <span className="font-medium">{formData.phoneCountryCode} {formData.phoneNumber}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Address:</span>
+                  <span className="font-medium text-right">
+                    {formData.streetAddress}<br />
+                    {formData.city}, {formData.state} {formData.zipCode}
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Membership Fee:</span>
+                  <span className="font-bold text-accent">$300.00</span>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
                 <Button
-                  onClick={handleSubmit(onSubmit)}
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep(2)}
+                  className="w-full"
+                >
+                  Back
+                </Button>
+                <Button
+                  onClick={handleFinalSubmit}
                   className="w-full bg-accent text-background hover:glow-blue-lg"
                   size="lg"
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading ? 'Creating Account...' : 'Create Account & Pay Fee'}
                 </Button>
               </div>
             </div>
