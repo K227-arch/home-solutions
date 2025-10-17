@@ -28,8 +28,9 @@ export function NewsFeed({ limit = 5, className = '' }: NewsFeedProps) {
     const fetchNews = async () => {
       try {
         setIsLoading(true)
-        const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:3000'
-        const response = await fetch(`${adminUrl}/api/news?limit=${limit}`)
+        const origin = process.env.NEXT_PUBLIC_ADMIN_URL?.replace(/\/$/, '')
+        const url = `${origin || ''}/api/news?limit=${limit}`
+        const response = await fetch(url)
 
         if (!response.ok) {
           throw new Error('Failed to fetch news')
